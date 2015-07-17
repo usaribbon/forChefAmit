@@ -6,10 +6,10 @@ He would like a web application to help him managing an inventory of all the ing
 Build a small application to help chef Amit managing his stock.
 He is not really interested in a beautiful app, he just needs something simple and functionnal.
 He wants to be able to:
-add ingredients to his inventory
-deal with quantities
-change the name of his ingredients in case he mispelled it
-remove the ingredients he has already used for cooking
+- add ingredients to his inventory
+- deal with quantities
+- change the name of his ingredients in case he mispelled it
+- remove the ingredients he has already used for cooking
 
 
 ### Constraints
