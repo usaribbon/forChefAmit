@@ -1,0 +1,19 @@
+{
+	"name": "LaBelleAssiette",
+	"version": "1.0.0",
+	"homepage": "http://labelleassiette.fr",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/LaBelleAssiette/jobs.git"
+	},
+	"main": "app/app.js",
+	"dependencies": {
+		"connect-multiparty": "1.2.x",
+		"express": "3.4.x",
+		"prompt": "0.2.x",
+		"underscore": "1.8.x"
+	},
+	"engines": {
+		"node": ">=0.10.x"
+	}
+}
