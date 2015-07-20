@@ -16,6 +16,6 @@ He wants to be able to:
 
 The backend must use our node.js application. Sadly, it is very basic and dirty… you will have to improve it by your own means.
 
-You must write your own file-based database management system to store the inventory. The data composition and the file(s) format are totally up to you.
+You must write your own file-based database management system to store the inventory. The data must be stored on the server. The data composition and the file(s) format are totally up to you.
 
 You can use whatever you want for the GUI (but it musts be javascript-based and in the browser).
