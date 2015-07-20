@@ -1,6 +1,6 @@
 ### Subject
 
-Now that chef Amit knows what he has in his possession, he finds it quite useless because he doesn’t know what recipes he can cook and for how much people.
+Now that chef Amit knows what he has in his possession, he finds it quite useless because he doesn’t know what recipes he can cook and for how many people.
 
 Amit sent us a list of the recipes he uses to cook. He would like you to improve your app to tell him what are the recipes he can cook with his current stock.
 The app will ask him for how many guests he wants to cook and display the recipes that are available.
