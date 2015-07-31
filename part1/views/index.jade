@@ -8,47 +8,61 @@ html(lang='en')
       	margin: 0 0.5em;
       	display:inline-block;
       }
+      .show-window{
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        width: 300px;
+        height: 300px;
+      }
+
     script(type='text/javascript').
-      function agreeDel(name){
-        return confirm('Are you sure to delete " ' + name + ' " ?');
+
+      function agreeDel(name,id){
+        var cnf = confirm(`Are you sure to delete ${name} ?`);
+        if(cnf) location.href = `./del/${id}`;
       }
 
       function checkVals(mode){
-      	var name,num;
-      	if(mode == 'editmode'){
-          name = document.getElementById('editName').value;
-          num = document.getElementById('editQuantity').value;
-      	}else{
-          name = document.getElementById('inputName').value;
-          num = document.getElementById('inputQuantity').value;
+      	var func = mode || 'added',
+        Food = function(name, num, func){
+          this.name = name;
+          this.quantity = num;
+          this.action = func;},
+        f = new Food;
+      	if(func == 'changed'){
+          f.name = document.getElementById('editName').value;
+          f.quantity = document.getElementById('editQuantity').value;
+          f.action = func;
+      	}else if(func=='added'){
+          f.name = document.getElementById('inputName').value;
+          f.quantity = document.getElementById('inputQuantity').value;
+          f.action = func;
       	}
-        if(!isNaN(name) || !isFinite(num) || !name || !num){
+        if(!isNaN(f.name) || !isFinite(f.quantity) || !f.name || !f.quantity){
           alert('Name must be String, Quantity must be number.');
           return false;
-        }
-        if(mode == 'editmode'){
-          alert('" ' + name +'" has been changed.');
         }else{
-          alert('" ' + name +'" has been added.');
+          alert(`${f.name} has been ${f.action}`);
+          return true;
         }
-        return true;
       }
 
       function changeEditVals(name,num,id){
-        var txtname = document.getElementById('editName');
-        var txtnum =  document.getElementById('editQuantity');
-        var txtid =  document.getElementById('editID');
-        txtname.value = name;
-        txtnum.value = num;
-        txtid.value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editQuantity').value = num;
+        document.getElementById('editID').value = id;
       }
 
       function editCondition(mode){
         var ediearea =  document.getElementById('edit');
-        var top = window.scrollY;
         var maincontent = document.getElementById('container');
       	if(mode=='editmode'){
-          ediearea.setAttribute('style','display:block;top:'+ (top+100)+'px;position:absolute;left:25%;');
+          ediearea.setAttribute('class','show-window');
+          ediearea.setAttribute('style','display:inline-block;');
           maincontent.setAttribute('style','opacity:0.4;');
       	}else if(mode=='hidden'){
       	  ediearea.setAttribute('style','display:none;');
@@ -78,20 +92,17 @@ html(lang='en')
            th.col-md-5 Quantity
            th.col-md-2
        tbody
-           each food in foods
+           each food, id in foods
              tr
                td #{food.name}
                td #{food.quantity}
                td
                  button.btn(
                  	class='btn-success',
-                 	onClick="changeEditVals('#{food.name}','#{food.quantity}','#{food.id}');editCondition('editmode')") Edit
-                 form(action='/del', method='post' class='deletbtn')
-                   input(type='hidden', name='id', value='#{food._id}')
-                   button.btn(
-                     type='submit',
-                     onClick="return agreeDel('#{food.name}')",
-                     class='btn-default') Del
+                 	onClick="changeEditVals('#{food.name}','#{food.quantity}','#{id}');editCondition('editmode')") Edit
+                 button.btn(
+                   onClick="agreeDel('#{food.name}','#{id}')",
+                   class='btn-default') Del
   div#edit(style='display:none;')
     div.panel(class='panel-default')
        div.panel-heading
@@ -106,7 +117,7 @@ html(lang='en')
            button.btn(
          	  type='submit',
          	  class='btn-success',
-         	  onClick='return checkVals("editmode")') Chage
+         	  onClick='return checkVals("changed")') Chage
            a.btn(
              class='btn-default',
              onClick='editCondition("hidden")') Cancel

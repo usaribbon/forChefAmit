@@ -1,6 +1,7 @@
 var express = require('express'),
 app = express(),
-util = require('util');
+util = require('util'),
+fs = require('fs');
 
 app.path = path = require('path');
 app.jsHandler = jsHandler = '';
@@ -8,22 +9,26 @@ app.jsHandler = jsHandler = '';
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views');
 
-/*** Mongo DB ***/
-var mongoose = require('mongoose'),
-Schema = mongoose.Schema;
+/*** File-based Databese ***/
+var jsonFile = __dirname + '/data.json',
+    rawJson = fs.readFileSync(jsonFile,'utf8'),
+    db = JSON.parse(rawJson);
+    //itemNums = Object.keys(db.foodlist).length,
 
-var foodSchema = new Schema({
-      name: String,
-      quantity: Number,
-      created_at: Date
-      //updated_at: Date
-    });
-    mongoose.model('Food', foodSchema);
+var Food = function (name,quantity){
+  this.name = escape(name);
+  this.quantity = quantity;
+}
 
-var db = mongoose.createConnection('mongodb://localhost/fooddb'),
-    Food = db.model('Food');
+function reloadJson(){
+  rawJson = fs.readFileSync(jsonFile,'utf8');
+  db = JSON.parse(rawJson);
+}
+
+function writeJson(){
+  fs.writeFileSync(jsonFile, JSON.stringify(db));
+}
 /****************/
-
 
 /***** Apps *****/
 app.configure(function() {
@@ -42,57 +47,31 @@ app.configure(function() {
   }));
   
   app.get('/', function (req, res) {
-    Food.find({}).sort('-created_at').exec(function (err, foodList){
-      res.render('index', 
-        {foods: foodList}
-      );
-    });
+    res.render('index', {foods: db.foodlist});
   });
 
   app.post('/add', function (req, res) {
-    var newFood = req.body;
-    Food.create(
-      {
-        name: newFood.name,
-        quantity: newFood.quantity,
-        created_at: Date.now()
-      }
-      , function(err, result) {
-        if (err) {
-          console.log('Error: ' + result + ' has been failt to insert.');
-        } else {
-          console.log('Success: ' + result + ' has been inserted');
-        }
-    });
+    var f = req.body;
+    var id = 'id_' + new Date().getTime();
+    db.foodlist[id] = new Food(f.name,f.quantity);
+    writeJson();
+    reloadJson();
     res.redirect('/');
   });
 
   app.post('/update', function (req, res) {
-    var food = req.body;
-    Food.update({_id:food.id},
-      {
-        name: food.name,
-        quantity: food.quantity
-      }
-      , function(err, result) {
-      if (err) {
-        console.log('Error: ' + result + ' has been failt to change.')
-      } else {
-        console.log('Success: ' + result + ' has been changed');
-      }
-    });
+    var f = req.body;
+    db.foodlist[f.id] = new Food(f.name,f.quantity);
+    writeJson();
+    reloadJson();
     res.redirect('/');
   });
 
-  app.post('/del', function (req, res) {
-    var id = req.body.id;
-    Food.findByIdAndRemove(id, function(err, result) {
-      if (err) {
-        console.log('Error: ' + result + ' has been failt to delete.')
-      } else {
-        console.log('Success: ' + result + ' has been deleted');
-      }
-    });
+  app.get('/del/:id', function (req, res) {
+    var id = req.params.id;
+    delete db.foodlist[id];
+    writeJson();
+    reloadJson();
     res.redirect('/');
   });
 

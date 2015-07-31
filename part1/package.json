@@ -11,7 +11,6 @@
     "connect-multiparty": "1.2.x",
     "express": "3.4.x",
     "jade": "^1.11.0",
-    "mongoose": "^4.1.0",
     "prompt": "0.2.x",
     "underscore": "1.8.x"
   },
