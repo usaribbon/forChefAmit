@@ -1,0 +1,112 @@
+doctype html
+html(lang='en')
+  title Chef Amit's Food List
+  head
+    link(href='bootstrap.min.css', rel='stylesheet')
+    style.
+      .deletbtn{
+      	margin: 0 0.5em;
+      	display:inline-block;
+      }
+    script(type='text/javascript').
+      function agreeDel(name){
+        return confirm('Are you sure to delete " ' + name + ' " ?');
+      }
+
+      function checkVals(mode){
+      	var name,num;
+      	if(mode == 'editmode'){
+          name = document.getElementById('editName').value;
+          num = document.getElementById('editQuantity').value;
+      	}else{
+          name = document.getElementById('inputName').value;
+          num = document.getElementById('inputQuantity').value;
+      	}
+        if(!isNaN(name) || !isFinite(num) || !name || !num){
+          alert('Name must be String, Quantity must be number.');
+          return false;
+        }
+        if(mode == 'editmode'){
+          alert('" ' + name +'" has been changed.');
+        }else{
+          alert('" ' + name +'" has been added.');
+        }
+        return true;
+      }
+
+      function changeEditVals(name,num,id){
+        var txtname = document.getElementById('editName');
+        var txtnum =  document.getElementById('editQuantity');
+        var txtid =  document.getElementById('editID');
+        txtname.value = name;
+        txtnum.value = num;
+        txtid.value = id;
+      }
+
+      function editCondition(mode){
+        var ediearea =  document.getElementById('edit');
+        var top = window.scrollY;
+        var maincontent = document.getElementById('container');
+      	if(mode=='editmode'){
+          ediearea.setAttribute('style','display:block;top:'+ (top+100)+'px;position:absolute;left:25%;');
+          maincontent.setAttribute('style','opacity:0.4;');
+      	}else if(mode=='hidden'){
+      	  ediearea.setAttribute('style','display:none;');
+      	  maincontent.setAttribute('style','opacity:1;');
+      	}
+      }
+      
+  body
+   div.container#container
+     h1.page-header Chef Amit's Food List
+     h4 Add New Food
+     form(action='/add', method='post')
+       table(class='table')
+         thead
+           tr
+             td
+               input(type='text', class='form-control', name='name', id='inputName' placeholder='food name')
+             td
+               input(type='text', class='form-control', name='quantity', id='inputQuantity' placeholder='quantity')
+             td
+               button.btn(type='submit', class='btn-primary', onClick="return checkVals()") Add
+     h4 Food Lists
+     table(class='table table-striped')
+       thead
+         tr
+           th.col-md-5 Foods
+           th.col-md-5 Quantity
+           th.col-md-2
+       tbody
+           each food in foods
+             tr
+               td #{food.name}
+               td #{food.quantity}
+               td
+                 button.btn(
+                 	class='btn-success',
+                 	onClick="changeEditVals('#{food.name}','#{food.quantity}','#{food.id}');editCondition('editmode')") Edit
+                 form(action='/del', method='post' class='deletbtn')
+                   input(type='hidden', name='id', value='#{food._id}')
+                   button.btn(
+                     type='submit',
+                     onClick="return agreeDel('#{food.name}')",
+                     class='btn-default') Del
+  div#edit(style='display:none;')
+    div.panel(class='panel-default')
+       div.panel-heading
+         h4.panel-title Edit
+       div.panel-body
+         form(action='/update', method='post')
+           input(type='hidden', name='id', id='editID')
+           label(class='control-label') Name
+           input(type='text', name='name', id='editName', class='form-control')
+           label(class='control-label') Quantity
+           input(type='text', name='quantity', id='editQuantity', class='form-control')
+           button.btn(
+         	  type='submit',
+         	  class='btn-success',
+         	  onClick='return checkVals("editmode")') Chage
+           a.btn(
+             class='btn-default',
+             onClick='editCondition("hidden")') Cancel
