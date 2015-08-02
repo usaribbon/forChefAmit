@@ -6,25 +6,19 @@ html(lang='en')
     style.
       .deletbtn{
       	margin: 0 0.5em;
-      	display:inline-block;
-      }
+      	display:inline-block;}
       .show-window{
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        top: 0;left: 0;right: 0;bottom: 0;
         margin: auto;
         width: 300px;
-        height: 300px;
-      }
+        height: 300px;}
 
     script(type='text/javascript').
 
       function agreeDel(name,id){
         var cnf = confirm(`Are you sure to delete ${name} ?`);
-        if(cnf) location.href = `./del/${id}`;
-      }
+        if(cnf) location.href = `./del/${id}`;}
 
       function checkVals(mode){
       	var func = mode || 'added',
@@ -36,19 +30,17 @@ html(lang='en')
       	if(func == 'changed'){
           f.name = document.getElementById('editName').value;
           f.quantity = document.getElementById('editQuantity').value;
-          f.action = func;
-      	}else if(func=='added'){
+          f.action = func;}
+        else if(func=='added'){
           f.name = document.getElementById('inputName').value;
           f.quantity = document.getElementById('inputQuantity').value;
-          f.action = func;
-      	}
+          f.action = func;}
         if(!isNaN(f.name) || !isFinite(f.quantity) || !f.name || !f.quantity){
           alert('Name must be String, Quantity must be number.');
-          return false;
-        }else{
+          return false;}
+        else{
           alert(`${f.name} has been ${f.action}`);
-          return true;
-        }
+          return true;}
       }
 
       function changeEditVals(name,num,id){
@@ -63,11 +55,10 @@ html(lang='en')
       	if(mode=='editmode'){
           ediearea.setAttribute('class','show-window');
           ediearea.setAttribute('style','display:inline-block;');
-          maincontent.setAttribute('style','opacity:0.4;');
-      	}else if(mode=='hidden'){
+          maincontent.setAttribute('style','opacity:0.4;');}
+        else if(mode=='hidden'){
       	  ediearea.setAttribute('style','display:none;');
-      	  maincontent.setAttribute('style','opacity:1;');
-      	}
+      	  maincontent.setAttribute('style','opacity:1;');}
       }
       
   body
@@ -103,6 +94,13 @@ html(lang='en')
                  button.btn(
                    onClick="agreeDel('#{food.name}','#{id}')",
                    class='btn-default') Del
+     ul.pager
+       unless pager.first
+         li.previous
+           a(href='./?page=#{pager.previous}') Previous
+       unless pager.last
+         li.next
+           a(href='./?page=#{pager.next}') Next
   div#edit(style='display:none;')
     div.panel(class='panel-default')
        div.panel-heading

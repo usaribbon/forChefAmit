@@ -9,25 +9,76 @@ app.jsHandler = jsHandler = '';
 app.set('view engine', 'jade');
 app.set('views', __dirname + '/views');
 
-/*** File-based Databese ***/
-var jsonFile = __dirname + '/data.json',
-    rawJson = fs.readFileSync(jsonFile,'utf8'),
-    db = JSON.parse(rawJson);
-    //itemNums = Object.keys(db.foodlist).length,
+/*** File-based Database ***/
+var JSONFILE = __dirname + '/data.json',
+db = loadJson();
 
 var Food = function (name,quantity){
   this.name = escape(name);
   this.quantity = quantity;
 }
 
-function reloadJson(){
-  rawJson = fs.readFileSync(jsonFile,'utf8');
-  db = JSON.parse(rawJson);
+function sortReverse(hash){
+  var keys = [], reversed = {};
+  for (var k in hash) keys.push(k);
+  keys.reverse();
+  for(var i = 0; i < keys.length; i++){
+    reversed[keys[i]] = hash[keys[i]];}
+  return reversed;
 }
 
-function writeJson(){
-  fs.writeFileSync(jsonFile, JSON.stringify(db));
+function loadJson(){
+  var data = JSON.parse(fs.readFileSync(JSONFILE,'utf8'));
+  console.log('Database : loaded');
+  return sortReverse(data.foodlist);
 }
+
+function updateJson(id,food){
+  var newdb = {};
+  newdb.foodlist = sortReverse(db);
+  if(id && food){
+    newdb.foodlist[id] = food;
+    console.log('Database : updated');}
+  else{
+    console.log('Database : item deleted');}
+  fs.writeFileSync(JSONFILE, JSON.stringify(newdb));
+}
+/****************/
+
+/*** Pager ***/
+var foodIndex = Object.keys(db),
+    foodCnt = foodIndex.length;
+
+function Pagination(page){
+  var itemNumPerPage = 10;
+  
+  var maxPage = Math.floor(foodCnt / itemNumPerPage);
+  if(page < 0){
+    page = 0;}
+  else if(page > maxPage){
+    page = maxPage;}
+
+  var itemPickFrom = page * itemNumPerPage,
+  foodlist = {},
+  foodlistlength = 0,
+  counter = 0;
+  for(var key in db){
+    if(counter >= itemPickFrom && foodlistlength < itemNumPerPage){
+      foodlist[key] = db[key];
+      foodlistlength = Object.keys(foodlist).length;}
+    counter++;}
+
+  /* valiables for View */
+  var pager = {};
+  if(foodlistlength < itemNumPerPage){
+    pager.last = true;}
+  if(itemPickFrom == 0){
+    pager.first = true;}
+  pager.previous = page - 1;
+  pager.next = page + 1;
+  return [foodlist, pager]; 
+}
+
 /****************/
 
 /***** Apps *****/
@@ -47,31 +98,33 @@ app.configure(function() {
   }));
   
   app.get('/', function (req, res) {
-    res.render('index', {foods: db.foodlist});
+    var page = (req.query.page) ? parseInt(req.query.page) : 0;
+    var pager = Pagination(page);
+    res.render('index', {foods: pager[0], pager: pager[1]});
   });
 
   app.post('/add', function (req, res) {
     var f = req.body;
     var id = 'id_' + new Date().getTime();
-    db.foodlist[id] = new Food(f.name,f.quantity);
-    writeJson();
-    reloadJson();
+    food = new Food(f.name,f.quantity);
+    updateJson(id, food);
+    db = loadJson();
     res.redirect('/');
   });
 
   app.post('/update', function (req, res) {
-    var f = req.body;
-    db.foodlist[f.id] = new Food(f.name,f.quantity);
-    writeJson();
-    reloadJson();
+    var f = req.body,
+    food = new Food(f.name,f.quantity);
+    updateJson(f.id, food);
+    db = loadJson();
     res.redirect('/');
   });
 
   app.get('/del/:id', function (req, res) {
     var id = req.params.id;
-    delete db.foodlist[id];
-    writeJson();
-    reloadJson();
+    delete db[id];
+    updateJson(id);
+    db = loadJson();
     res.redirect('/');
   });
 
